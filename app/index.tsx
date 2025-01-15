@@ -1,14 +1,22 @@
+import ArticleCard from "@/components/ArticleCard";
+import { Article } from "@/constants/article.interface";
 import { NEWS_API_KEY } from "@/constants/constants";
 import { useEffect, useState } from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  FlatList,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function Index() {
-  const [articles, setArticles] = useState<string[]>([]);
+  const [articles, setArticles] = useState<Article[]>([]);
   const [query, setQuery] = useState("");
 
-  useEffect(() => {
-    setArticles(["hello"]);
-  }, []);
+  // useEffect(() => {
+  //   setArticles([]);
+  // }, []);
 
   const onChangeText = (text: string) => {
     setQuery(text);
@@ -16,10 +24,16 @@ export default function Index() {
 
   const onSearch = () => {
     fetch(
-      `https://newsapi.org/v2/everything?q=Apple&from=2025-01-01&sortBy=popularity&apiKey=${NEWS_API_KEY}`
+      `https://newsapi.org/v2/everything?q=${query}&from=2025-01-01&sortBy=popularity&apiKey=${NEWS_API_KEY}`
     )
       .then((res) => res.json())
-      .then((res) => res.articles && setArticles(res.articles))
+      .then(
+        (res) =>
+          res.articles &&
+          setArticles(
+            res.articles.map((a: Article, index: number) => ({ ...a, index }))
+          )
+      )
       .catch((err) => console.error(err));
   };
 
@@ -29,6 +43,7 @@ export default function Index() {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
+        padding: 16,
       }}
     >
       <Text>Articles</Text>
@@ -36,7 +51,6 @@ export default function Index() {
         style={{
           flexDirection: "row",
           alignItems: "center",
-          padding: 16,
         }}
       >
         <TextInput
@@ -65,11 +79,14 @@ export default function Index() {
           <Text style={{ color: "white" }}>Search</Text>
         </TouchableOpacity>
       </View>
-      {articles.map((art) => (
-        <View>
-          <Text>{JSON.stringify(art)}</Text>
-        </View>
-      ))}
+
+      <FlatList
+        data={articles}
+        renderItem={({ item }) => <ArticleCard article={item} />}
+        keyExtractor={(item) =>
+          item.url.concat(item.publishedAt).concat(item.title)
+        }
+      />
     </View>
   );
 }
