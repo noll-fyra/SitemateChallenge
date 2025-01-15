@@ -31,7 +31,8 @@ export default function Index() {
         (res) =>
           res.articles &&
           setArticles(
-            res.articles.map((a: Article, index: number) => ({ ...a, index }))
+            // hide any removed articles
+            res.articles.filter((a: Article) => !a.url.includes("removed.com"))
           )
       )
       .catch((err) => console.error(err));
@@ -41,19 +42,18 @@ export default function Index() {
     <View
       style={{
         flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
         padding: 16,
       }}
     >
-      <Text>Articles</Text>
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
+          marginBottom: 8,
         }}
       >
         <TextInput
+          onSubmitEditing={onSearch}
           onChangeText={onChangeText}
           value={query}
           style={{
@@ -86,6 +86,7 @@ export default function Index() {
         keyExtractor={(item) =>
           item.url.concat(item.publishedAt).concat(item.title)
         }
+        showsVerticalScrollIndicator={false}
       />
     </View>
   );
