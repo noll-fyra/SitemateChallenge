@@ -13,18 +13,20 @@ import {
 export default function Index() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [query, setQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(true);
 
-  // useEffect(() => {
-  //   setArticles([]);
-  // }, []);
+  useEffect(() => {
+    fetchTopHeadlines();
+  }, []);
 
   const onChangeText = (text: string) => {
     setQuery(text);
   };
 
-  const onSearch = () => {
+  const fetchTopHeadlines = () => {
+    setIsSearching(true);
     fetch(
-      `https://newsapi.org/v2/everything?q=${query}&from=2025-01-01&sortBy=popularity&apiKey=${NEWS_API_KEY}`
+      `https://newsapi.org/v2/top-headlines?country=us&apiKey=${NEWS_API_KEY}`
     )
       .then((res) => res.json())
       .then(
@@ -35,7 +37,37 @@ export default function Index() {
             res.articles.filter((a: Article) => !a.url.includes("removed.com"))
           )
       )
-      .catch((err) => console.error(err));
+      .catch((err) => console.error(err))
+      .finally(() => setIsSearching(false));
+  };
+
+  const fetchHeadlinesByQuery = () => {
+    const earliestDate = "2025-01-01";
+    const sortBy = "publishedAt";
+
+    setIsSearching(true);
+    fetch(
+      `https://newsapi.org/v2/everything?q=${query}&from=${earliestDate}&sortBy=${sortBy}&language=en&apiKey=${NEWS_API_KEY}`
+    )
+      .then((res) => res.json())
+      .then(
+        (res) =>
+          res.articles &&
+          setArticles(
+            // hide any removed articles
+            res.articles.filter((a: Article) => !a.url.includes("removed.com"))
+          )
+      )
+      .catch((err) => console.error(err))
+      .finally(() => setIsSearching(false));
+  };
+
+  const onSearch = () => {
+    if (!query) {
+      fetchTopHeadlines();
+    } else {
+      fetchHeadlinesByQuery();
+    }
   };
 
   return (
@@ -79,6 +111,18 @@ export default function Index() {
           <Text style={{ color: "white" }}>Search</Text>
         </TouchableOpacity>
       </View>
+
+      {isSearching && (
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            marginVertical: 8,
+          }}
+        >
+          <Text>Fetching articles...</Text>
+        </View>
+      )}
 
       <FlatList
         data={articles}
