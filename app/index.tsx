@@ -1,6 +1,6 @@
 import ArticleCard from "@/components/ArticleCard";
 import { Article } from "@/constants/article.interface";
-import { NEWS_API_KEY } from "@/constants/constants";
+import { NEWS_API_KEY, sitemateBlue } from "@/constants/constants";
 import { useEffect, useState } from "react";
 import {
   FlatList,
@@ -14,6 +14,7 @@ export default function Index() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [query, setQuery] = useState("");
   const [isSearching, setIsSearching] = useState(true);
+  const [read, setRead] = useState<string[]>([]);
 
   useEffect(() => {
     fetchTopHeadlines();
@@ -70,6 +71,10 @@ export default function Index() {
     }
   };
 
+  const markAsRead = (url: string) => {
+    setRead(read.concat(url));
+  };
+
   return (
     <View
       style={{
@@ -88,6 +93,8 @@ export default function Index() {
           onSubmitEditing={onSearch}
           onChangeText={onChangeText}
           value={query}
+          placeholder="Search for news"
+          clearButtonMode="always"
           style={{
             flex: 1,
             height: 48,
@@ -100,7 +107,7 @@ export default function Index() {
           style={{
             width: 72,
             height: 48,
-            backgroundColor: "rgb(46,129,218)",
+            backgroundColor: sitemateBlue,
             flexDirection: "row",
             justifyContent: "center",
             alignItems: "center",
@@ -124,9 +131,40 @@ export default function Index() {
         </View>
       )}
 
+      {!isSearching && articles.length === 0 && (
+        <View
+          style={{
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            marginVertical: 8,
+          }}
+        >
+          <Text>No articles found</Text>
+          <TouchableOpacity
+            onPress={fetchTopHeadlines}
+            style={{
+              marginTop: 16,
+              backgroundColor: sitemateBlue,
+              paddingVertical: 8,
+              paddingHorizontal: 16,
+              borderRadius: 16,
+            }}
+          >
+            <Text style={{ color: "white" }}>See latest headlines</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       <FlatList
         data={articles}
-        renderItem={({ item }) => <ArticleCard article={item} />}
+        renderItem={({ item }) => (
+          <ArticleCard
+            article={item}
+            isRead={read.includes(item.url)}
+            markAsRead={markAsRead}
+          />
+        )}
         keyExtractor={(item) =>
           item.url.concat(item.publishedAt).concat(item.title)
         }

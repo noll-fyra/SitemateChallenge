@@ -2,7 +2,15 @@ import { View, Text, Image } from "react-native";
 import { Article } from "@/constants/article.interface";
 import { Link } from "expo-router";
 
-export default function ArticleCard({ article }: { article: Article }) {
+export default function ArticleCard({
+  article,
+  isRead,
+  markAsRead,
+}: {
+  article: Article;
+  isRead: boolean;
+  markAsRead: (url: string) => void;
+}) {
   return (
     <Link
       href={{
@@ -13,6 +21,7 @@ export default function ArticleCard({ article }: { article: Article }) {
           url: article.url,
         },
       }}
+      onPress={() => markAsRead(article.url)}
     >
       <View
         style={{
@@ -36,9 +45,22 @@ export default function ArticleCard({ article }: { article: Article }) {
           <Text style={{ fontSize: 10, fontWeight: 500, color: "grey" }}>
             {article.source?.name.toLocaleUpperCase()}
           </Text>
-          <Text style={{ fontWeight: 600 }}>{article.title}</Text>
-          <Text style={{ color: "grey" }}>{article.description}</Text>
-          <Text style={{ fontSize: 10, fontWeight: 500, marginTop: 8 }}>
+          <Text
+            style={{ fontWeight: 600, color: isRead ? "#aaaaaa" : "black" }}
+          >
+            {article.title}
+          </Text>
+          <Text style={{ color: isRead ? "#bbbbbb" : "grey" }}>
+            {article.description}
+          </Text>
+          <Text
+            style={{
+              fontSize: 10,
+              fontWeight: 500,
+              marginTop: 8,
+              color: isRead ? "#aaaaaa" : "black",
+            }}
+          >
             {article.publishedAt}
           </Text>
         </View>
