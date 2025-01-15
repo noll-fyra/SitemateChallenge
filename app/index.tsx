@@ -1,3 +1,4 @@
+import { NEWS_API_KEY } from "@/constants/constants";
 import { useEffect, useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 
@@ -14,7 +15,12 @@ export default function Index() {
   };
 
   const onSearch = () => {
-    console.log("hey");
+    fetch(
+      `https://newsapi.org/v2/everything?q=Apple&from=2025-01-01&sortBy=popularity&apiKey=${NEWS_API_KEY}`
+    )
+      .then((res) => res.json())
+      .then((res) => res.articles && setArticles(res.articles))
+      .catch((err) => console.error(err));
   };
 
   return (
